@@ -14,10 +14,22 @@ def add_score(ps)
     case choice
     when "f"
         puts "Enter stroke count: "
-        ps.first(9).each { |k, _v| ps[k] = gets.chomp.to_i } # Add to hash 1-9
+        ps.first(9).each do |k, _v| 
+            ps[k] = gets.chomp.to_i # Add to hash 1-9
+        end
     when "b"
         puts "Enter stroke count: "
-        ps.last(9).each { |k, _v| ps[k] = gets.chomp.to_i } # Add to hash from 10-18
+        # Add to hash from 10-18
+        ps.to_a.each_with_index do |k, i|
+            if i < 9
+                next
+            else
+                k[1] = gets.chomp.to_i
+                ps[k[0]] = k
+                p k
+            end
+        end
+        p ps
     when "a"
         puts "Enter stroke count: "
         ps.each { |k, _v| ps[k] = gets.chomp.to_i } # Add to hash 1-18
@@ -45,13 +57,19 @@ def menu(pc, ps, hs)
                 ps.each { |k, v| p "Hole: #{k.capitalize} @ #{v}" unless v.nil? }
             end
         when "4"
-            puts "This is where highscores go"
+            puts "Best score!" # Prints best score # TODO implement System to take highest values
             hs.each { |k, v| p "Hole: #{k.capitalize} @ #{v}" unless v.nil? }
         when "5"
             puts "Goodbye"
             break
         end
     end
+end
+
+def make_highest(ps, hs)
+  # whatever the highest value of each hash is, take that and place it in hs
+  # if ps[key] = value > hs[key] = value
+  # save into hs{}
 end
 
 menu(par_count, personal_score, high_score)
