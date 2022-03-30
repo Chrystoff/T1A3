@@ -24,8 +24,7 @@ def add_score(ps)
             if i < 9
                 next
             else
-                k[1] = gets.chomp.to_i
-                ps[k[0]] = k
+                ps[k[0]] = gets.chomp.to_i
                 p k
             end
         end
