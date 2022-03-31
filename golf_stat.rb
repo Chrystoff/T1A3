@@ -36,6 +36,20 @@ def add_score(ps)
     end
 end
 
+# View past scores method
+def past_scores(past_s)
+        if past_s[:one].nil? && past_s[:ten].nil? # if statement to check if any values exist yet
+        puts "No Personal score yet." # Checks if hash is empty and delivers this outcome
+        else
+        # puts "You had a stroke count of #{ps.values.sum}"     ### TODO FIX ERROR CAN'T ADD NIL might have to make a incrementer thing
+        puts "Scores: "
+        # Goes through all available personal scores
+        past_s.each do |k, v|
+            p "Hole: #{k.capitalize} @ #{v}" unless v.nil?
+        end
+        end
+end
+
 # Menu method, this is the main menu and how it navigates. # Parameters: par_count, personal_score and high_score
 def menu(pc, ps, hs)
     while true # Loop which starts menu and only breaks in quit (5)
@@ -47,16 +61,7 @@ def menu(pc, ps, hs)
         when "2" # View Course Par
             pc.each { |hole, par| p "Hole #{hole.capitalize} is #{par} par" } # displays the courses par
         when "3" # View Past Scores
-            if ps[:one].nil? && ps[:ten].nil? # if statement to check if any values exist yet
-                puts "No Personal score yet." # Checks if hash is empty and delivers this outcome
-            else
-                # puts "You had a stroke count of #{ps.values.sum}"     ### TODO FIX ERROR CAN'T ADD NIL might have to make a incrementer thing
-                puts "Scores: "
-                # Goes through all available personal scores
-                ps.each do |k, v|
-                 p "Hole: #{k.capitalize} @ #{v}" unless v.nil?
-                end
-            end
+            past_scores(ps)
         when "4" # Viewing the high scores      ### TODO NOT IMPLEMENTED
             puts "Best score!"
             hs.each { |k, v| p "Hole: #{k.capitalize} @ #{v}" unless v.nil? }
@@ -76,14 +81,13 @@ end
 
 # Plan to make a method that works out an average of all your scores
 def make_average(ps)
-# This needs my read and write part to be active
+  # This needs my read and write part to be active
 end
 
-# Planning to have a feature which saves hashes to a file to recall or use presonally. 
+# Planning to have a feature which saves hashes to a file to recall or use presonally.
 # also would use this in the make_average, make_highest methods
-def save_to_file(ps, hs)
+def save_to_file(ps, hs); 
 end
-
 
 # Method call and parameters
 menu(par_count, personal_score, high_score)
