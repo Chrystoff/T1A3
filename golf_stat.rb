@@ -7,6 +7,12 @@ high_score = { one: nil, two: nil, three: nil, four: nil, five: nil, six: nil, s
 # Default scores
 personal_score = high_score.clone
 
+class InvalidEntryError < StandardError
+    def message
+        "Invalid string entered. See suggestions."
+    end
+end
+
 puts "Welcome to the golf stat tracker!"
 
 # Add score method, this is what lets you input values into personal_score hash  # personal score is the sole parameter
@@ -15,11 +21,18 @@ def add_score(ps)
     choice = gets.chomp.downcase # Getting input for menu option
     case choice # Case method based off 'choice' variable   ### TODO ONLY ADD NUMBERS
     when "f" # Front 9 holes
+        begin
         puts "Enter stroke count: "
         ps.first(9).each do |k, _v|
             ps[k] = gets.chomp.to_i # Add to hash 1-9
+            7 / ps[k] # Error handling since 0 can't divide by anything and letters always equal 0 # I couldn't work out another way T_T
+        rescue ZeroDivisionError
+            p "You can only enter numbers" # Stops and rescues invalid inputs
+            retry
+        end
         end
     when "b" # Back 9 holes
+
         puts "Enter stroke count: "
         ps.each_with_index do |k, i| # going through each with index, with a to_a method to make sure I can use array methods on the hash.
             if i < 9 # I don't want the front 9 holes to be changed
@@ -31,22 +44,30 @@ def add_score(ps)
     when "a" # All 18 holes
         puts "Enter stroke count: "
         ps.each { |k, _v| ps[k] = gets.chomp.to_i } # Add to hash 1-18
+    when "5"
+        puts "Back to Main Menu"
     else
-        puts "Not a valid input" if choice != "5"
+        puts "Not a valid input, enter 5 to quit to main"
+        add_score(ps)
     end
 end
 
 # View past scores method
 def past_scores(past_s)
         if past_s[:one].nil? && past_s[:ten].nil? # if statement to check if any values exist yet
-        puts "No Personal score yet." # Checks if hash is empty and delivers this outcome
+            puts "No Personal score yet." # Checks if hash is empty and delivers this outcome
+        elsif !past_s[:one].nil? && !past_s[:ten].nil?
+                puts "You had a stroke count of #{past_s.values.sum} for all eighteen Holes"
+                puts "Here are the scores per hole: "
+                past_s.each do |hole, stroke|
+                    p "Hole: #{hole.capitalize} @ #{stroke}" unless stroke.nil?
+                end
         else
-        # puts "You had a stroke count of #{ps.values.sum}"     ### TODO FIX ERROR CAN'T ADD NIL might have to make a incrementer thing
-        puts "Scores: "
-        # Goes through all available personal scores
-        past_s.each do |k, v|
-            p "Hole: #{k.capitalize} @ #{v}" unless v.nil?
-        end
+            puts "Stroke count per hole: "
+            # Goes through all available personal scores
+            past_s.each do |hole, stroke|
+                p "Hole: #{hole.capitalize} @ #{stroke}" unless stroke.nil?
+            end
         end
 end
 
@@ -86,8 +107,7 @@ end
 
 # Planning to have a feature which saves hashes to a file to recall or use presonally.
 # also would use this in the make_average, make_highest methods
-def save_to_file(ps, hs); 
-end
+def save_to_file(ps, hs); end
 
 # Method call and parameters
 menu(par_count, personal_score, high_score)
