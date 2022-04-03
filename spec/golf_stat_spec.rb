@@ -1,3 +1,4 @@
-require_relative '../golf_stat.rb'
+require './golf_stat'
 
-describe '#'
+describe make_highest
+end
