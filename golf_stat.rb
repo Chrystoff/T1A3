@@ -13,6 +13,12 @@ class NoRecordsError < ArgumentError
     end
 end
 
+class InvalidNameError < StandardError
+    def message
+        p "Can't be empty!"
+    end
+end
+
 puts "Welcome to the golf stat tracker!"
 
 # Add score method, this is what lets you input values into personal_score hash  # personal score is the sole parameter
@@ -25,7 +31,7 @@ def add_score(ps)
             puts "Enter stroke count: "
             ps.first(9).each do |k, _v|
             ps[k] = Integer(gets.chomp) # Add to hash 1-9
-        rescue ArgumentError
+            rescue ArgumentError
             p "Invalid entry. You can only enter numbers" # Stops and rescues invalid inputs
             retry
             end
@@ -35,13 +41,13 @@ def add_score(ps)
             puts "Enter stroke count: "
             ps.each_with_index do |k, i| # going through each with index so I can get to the last 9 holes
                 if i > 8 # If index is greater than 8 (holes 10+)
-                    ps[k[0]] = Integer(gets.chomp) #Adding to hash
+                    ps[k[0]] = Integer(gets.chomp) # Adding to hash
                 end
-        rescue ArgumentError
+            rescue ArgumentError
             p "Invalid entry. You can only enter numbers" # Stops and rescues invalid inputs
             retry
+            end
         end
-    end
     when "a" # All 18 holes
         begin
             puts "Enter stroke count: "
@@ -49,10 +55,10 @@ def add_score(ps)
         rescue ArgumentError
             retry
         end
-    when "5"
+    when "6"
         puts "Back to Main Menu"
     else
-        puts "Not a valid input, enter 5 to quit to main"
+        puts "Not a valid input, enter 6 to quit to main"
         add_score(ps)
     end
 end
@@ -65,13 +71,14 @@ def past_scores(past_s)
                 puts "You had a stroke count of #{past_s.values.sum} for all eighteen Holes"
                 puts "Here are the scores per hole: "
                 past_s.each do |hole, stroke|
-                    p "#{hole.capitalize}: #{stroke}" unless stroke.nil?
+                    p "#{hole.capitalize} | #{stroke}" unless stroke.nil?
                 end
         else
+            puts "Stroke count: #{past_s.compact.values.sum}"
             puts "Stroke count per hole: "
             # Goes through all available personal scores
             past_s.each do |hole, stroke|
-                p "#{hole.capitalize}: #{stroke}" unless stroke.nil?
+                p "#{hole.capitalize} | #{stroke}" unless stroke.nil?
             end
         end
 end
@@ -79,26 +86,36 @@ end
 # Menu method, this is the main menu and how it navigates. # Parameters: par_count, personal_score and high_score
 def menu(pc, ps, hs)
     while true # Loop which starts menu and only breaks in quit (5)
-        puts "\nWhat would you like to do? (1.Add round, 2.View Course Par, 3.View past scores, 4.View high scores, 5.Quit)"
+        puts "\nWhat would you like to do?"
+        puts "1.Add round, 2.View Course Par, 3.View past scores, 4.View high scores, 5.Save high score, 6. Quit"
         make_highest(ps, hs)
         input = gets.chomp # Haven't fixed this to accept no other values yet.
         case input
         when "1" # Add round
             add_score(ps) # Call to add_score Method
         when "2" # View Course Par
-            pc.each { |hole, par| p "#{hole.capitalize} is a #{par} par" } # displays the courses par
+            pc.each { |hole, par| p "#{hole.capitalize} | #{par} par" } # displays the courses par
         when "3" # View Past Scores
             past_scores(ps)
-        when "4" # Viewing the high scores      ### TODO NOT IMPLEMENTED
+        when "4" # Viewing the high scores
             begin
                 raise(NoRecordsError) if ps[:one].nil? && ps[:ten].nil?
+
                 puts "Best score!"
-                hs.each { |k, v| p "#{k.capitalize}: #{v}" unless v.nil? }
+                hs.each { |k, v| p "#{k.capitalize} | #{v}" unless v.nil? }
             rescue NoRecordsError => e
                 e.message
                 next
             end
-        when "5" # Quit
+        when "5"
+            begin
+                save_to_file(hs)
+                p "Save complete"
+            rescue TypeError
+                p "No "
+                next
+            end                
+        when "6" # Quit
             puts "Goodbye"
             break
         end
@@ -108,22 +125,34 @@ end
 # Gives High_score value of personal score only take values that are higher.
 def make_highest(ps, hs)
     ps.each do |k, v| # Go through all keys
-        if hs[k].nil? || hs[k] != k # if hash value is nil OR hash value is not equal to personal score
-            hs[k] = v
-        end
+        hs[k] = v if hs[k].nil? || hs[k] != k # if hash value is nil OR hash value is not equal to personal score
     end
 end
 
-# Plan to make a method that works out an average of all your scores
-def make_average(ps)
-  # This needs my read and write part to be active
-end
+# Save the current highscore to a file
+def save_to_file(hs)
+    begin
+        time = Time.new
+        p "Enter your name: "
+        name = gets.chomp.capitalize
+        raise(InvalidNameError) if name.empty?
 
-# Planning to have a feature which saves hashes to a file to recall or use presonally.
-# also would use this in the make_average, make_highest methods
-def save_to_file(ps, hs); end
+        p "Enter Course: "
+        course = gets.chomp.capitalize
+        raise(InvalidNameError) if course.empty?
+
+    rescue InvalidNameError => e
+        e.message
+        retry
+    end
+    file = File.open('records.txt', 'a')
+    file << "\n------------------#{course}----------------------"
+    file << "\nScored on: #{time.day}/#{time.month}/#{time.year} by #{name}"
+    file << "\n------------------#{course}----------------------"
+    file << "\nTotal Strikes: #{hs.compact.values.sum}"
+    hs.each { |hole, hits| file << "\n#{hole.capitalize} | #{hits}" unless hits.nil?}
+    file.close
+end
 
 # Method call and parameters
 menu(par_count, personal_score, high_score)
-
-# make_highest(personal_score, high_score)
