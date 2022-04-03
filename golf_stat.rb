@@ -7,9 +7,9 @@ high_score = { one: nil, two: nil, three: nil, four: nil, five: nil, six: nil, s
 # Default scores
 personal_score = high_score.clone
 
-class InvalidEntryError < StandardError
+class NoRecordsError < ArgumentError
     def message
-        "Invalid string entered. See suggestions."
+        p "No input values yet."
     end
 end
 
@@ -22,28 +22,33 @@ def add_score(ps)
     case choice # Case method based off 'choice' variable   ### TODO ONLY ADD NUMBERS
     when "f" # Front 9 holes
         begin
-        puts "Enter stroke count: "
-        ps.first(9).each do |k, _v|
-            ps[k] = gets.chomp.to_i # Add to hash 1-9
-            7 / ps[k] # Error handling since 0 can't divide by anything and letters always equal 0 # I couldn't work out another way T_T
-        rescue ZeroDivisionError
-            p "You can only enter numbers" # Stops and rescues invalid inputs
+            puts "Enter stroke count: "
+            ps.first(9).each do |k, _v|
+            ps[k] = Integer(gets.chomp) # Add to hash 1-9
+        rescue ArgumentError
+            p "Invalid entry. You can only enter numbers" # Stops and rescues invalid inputs
             retry
-        end
-        end
-    when "b" # Back 9 holes
-
-        puts "Enter stroke count: "
-        ps.each_with_index do |k, i| # going through each with index, with a to_a method to make sure I can use array methods on the hash.
-            if i < 9 # I don't want the front 9 holes to be changed
-                next # if index is under 9 ie 'hole 10' then skip to next index
-            else
-                ps[k[0]] = gets.chomp.to_i # changing the value of k, which is :ten, :eleven and so on.
             end
         end
+    when "b" # Back 9 holes
+        begin
+            puts "Enter stroke count: "
+            ps.each_with_index do |k, i| # going through each with index so I can get to the last 9 holes
+                if i > 8 # If index is greater than 8 (holes 10+)
+                    ps[k[0]] = Integer(gets.chomp) #Adding to hash
+                end
+        rescue ArgumentError
+            p "Invalid entry. You can only enter numbers" # Stops and rescues invalid inputs
+            retry
+        end
+    end
     when "a" # All 18 holes
-        puts "Enter stroke count: "
-        ps.each { |k, _v| ps[k] = gets.chomp.to_i } # Add to hash 1-18
+        begin
+            puts "Enter stroke count: "
+            ps.each { |k, _v| ps[k] = Integer(gets.chomp) } # Add to hash 1-18
+        rescue ArgumentError
+            retry
+        end
     when "5"
         puts "Back to Main Menu"
     else
@@ -54,19 +59,19 @@ end
 
 # View past scores method
 def past_scores(past_s)
-        if past_s[:one].nil? && past_s[:ten].nil? # if statement to check if any values exist yet
-            puts "No Personal score yet." # Checks if hash is empty and delivers this outcome
-        elsif !past_s[:one].nil? && !past_s[:ten].nil?
+        if past_s[:one].nil? && past_s[:ten].nil? # Checks if hash is empty and delivers this outcome
+            puts "No Personal score yet."
+        elsif !past_s[:one].nil? && !past_s[:ten].nil? # Checks if hash is full and delivers stroke count
                 puts "You had a stroke count of #{past_s.values.sum} for all eighteen Holes"
                 puts "Here are the scores per hole: "
                 past_s.each do |hole, stroke|
-                    p "Hole: #{hole.capitalize} @ #{stroke}" unless stroke.nil?
+                    p "#{hole.capitalize}: #{stroke}" unless stroke.nil?
                 end
         else
             puts "Stroke count per hole: "
             # Goes through all available personal scores
             past_s.each do |hole, stroke|
-                p "Hole: #{hole.capitalize} @ #{stroke}" unless stroke.nil?
+                p "#{hole.capitalize}: #{stroke}" unless stroke.nil?
             end
         end
 end
@@ -75,17 +80,24 @@ end
 def menu(pc, ps, hs)
     while true # Loop which starts menu and only breaks in quit (5)
         puts "\nWhat would you like to do? (1.Add round, 2.View Course Par, 3.View past scores, 4.View high scores, 5.Quit)"
+        make_highest(ps, hs)
         input = gets.chomp # Haven't fixed this to accept no other values yet.
         case input
         when "1" # Add round
             add_score(ps) # Call to add_score Method
         when "2" # View Course Par
-            pc.each { |hole, par| p "Hole #{hole.capitalize} is #{par} par" } # displays the courses par
+            pc.each { |hole, par| p "#{hole.capitalize} is a #{par} par" } # displays the courses par
         when "3" # View Past Scores
             past_scores(ps)
         when "4" # Viewing the high scores      ### TODO NOT IMPLEMENTED
-            puts "Best score!"
-            hs.each { |k, v| p "Hole: #{k.capitalize} @ #{v}" unless v.nil? }
+            begin
+                raise(NoRecordsError) if ps[:one].nil? && ps[:ten].nil?
+                puts "Best score!"
+                hs.each { |k, v| p "#{k.capitalize}: #{v}" unless v.nil? }
+            rescue NoRecordsError => e
+                e.message
+                next
+            end
         when "5" # Quit
             puts "Goodbye"
             break
@@ -93,11 +105,13 @@ def menu(pc, ps, hs)
     end
 end
 
-# Planning to merge ps into hs, and only take values that are higher.
+# Gives High_score value of personal score only take values that are higher.
 def make_highest(ps, hs)
-  # whatever the highest value of each hash is, take that and place it in hs
-  # if ps[key] = value > hs[key] = value
-  # save into hs{}
+    ps.each do |k, v| # Go through all keys
+        if hs[k].nil? || hs[k] != k # if hash value is nil OR hash value is not equal to personal score
+            hs[k] = v
+        end
+    end
 end
 
 # Plan to make a method that works out an average of all your scores
@@ -111,3 +125,5 @@ def save_to_file(ps, hs); end
 
 # Method call and parameters
 menu(par_count, personal_score, high_score)
+
+# make_highest(personal_score, high_score)
