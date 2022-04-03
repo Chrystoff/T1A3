@@ -7,12 +7,14 @@ high_score = { one: nil, two: nil, three: nil, four: nil, five: nil, six: nil, s
 # Default scores
 personal_score = high_score.clone
 
+# Error type for when nil values in records. used on line No. 105, 109
 class NoRecordsError < ArgumentError
     def message
         p "No input values yet."
     end
 end
 
+# Error type for when someone enters empty values for their name. used on line No. 140, 144, 145
 class InvalidNameError < StandardError
     def message
         p "Can't be empty!"
@@ -32,9 +34,9 @@ class GolfApp
                 puts "Enter stroke count per hole: "
                 ps.first(9).each do |k, _v|
                 ps[k] = Integer(gets.chomp) # Add to hash 1-9
-                rescue ArgumentError
-                p "Invalid entry. You can only enter numbers" # Stops and rescues invalid inputs
-                retry
+                rescue ArgumentError    # Rescue for when value entered isn't number
+                    p "Invalid entry. You can only enter integers" # Stops and rescues invalid inputs
+                    retry
                 end
             end
         when "b" # Back 9 holes
@@ -45,7 +47,7 @@ class GolfApp
                         ps[k[0]] = Integer(gets.chomp) # Adding to hash
                     end
                 rescue ArgumentError
-                p "Invalid entry. You can only enter numbers" # Stops and rescues invalid inputs
+                p "Invalid entry. You can only enter integers" # Stops and rescues invalid inputs
                 retry
                 end
             end
@@ -54,11 +56,12 @@ class GolfApp
                 puts "Enter stroke count per hole: "
                 ps.each { |k, _v| ps[k] = Integer(gets.chomp) } # Add to hash 1-18
             rescue ArgumentError
+                p "Invalid entry. You can only enter integers" # Stops and rescues invalid inputs
                 retry
             end
-        when "6"
+        when "6" # Quit App
             puts "Back to Main Menu"
-        else
+        else # Prompts the user what the quit button is, then calls this method again to re-do method
             puts "Not a valid input, enter 6 to quit to main"
             add_score(ps)
         end
@@ -109,13 +112,8 @@ class GolfApp
                     next
                 end
             when "5"
-                begin
-                    save_to_file(hs)
-                    p "Save complete"
-                rescue TypeError
-                    p "No "
-                    next
-                end
+                save_to_file(hs)
+                p "Save complete"
             when "6" # Quit
                 puts "Goodbye"
                 break
