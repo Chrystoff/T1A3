@@ -10,19 +10,23 @@ personal_score = high_score.clone
 # Error type for when nil values in records. used on line No. 105, 109
 class NoRecordsError < ArgumentError
     def message
-        p "No input values yet."
+        system "clear"
+        puts "No input Records yet.\n\n"
     end
 end
 
 # Error type for when someone enters empty values for their name. used on line No. 140, 144, 145
 class InvalidNameError < StandardError
     def message
-        p "Can't be empty!"
+        system "clear"
+        puts "Can't be empty!\n\n"
     end
 end
 
 class GolfApp
+    system "clear"
     puts "Welcome to the golf stat tracker!"
+    puts "The App that keeps track of your scores!"
 
     # Add score method, this is what lets you input values into personal_score hash  # personal score is the sole parameter
     def add_score(ps)
@@ -34,11 +38,13 @@ class GolfApp
                 puts "Enter stroke count per hole: "
                 ps.first(9).each do |k, _v|
                 ps[k] = Integer(gets.chomp) # Add to hash 1-9
-                rescue ArgumentError    # Rescue for when value entered isn't number
+                rescue ArgumentError # Rescue for when value entered isn't number
                     p "Invalid entry. You can only enter integers" # Stops and rescues invalid inputs
                     retry
                 end
             end
+            system "clear"
+            puts "Added to score card"
         when "b" # Back 9 holes
             begin
                 puts "Enter stroke count per hole: "
@@ -47,10 +53,12 @@ class GolfApp
                         ps[k[0]] = Integer(gets.chomp) # Adding to hash
                     end
                 rescue ArgumentError
-                p "Invalid entry. You can only enter integers" # Stops and rescues invalid inputs
+                    p "Invalid entry. You can only enter integers" # Stops and rescues invalid inputs
                 retry
                 end
             end
+            system "clear"
+            puts "Added to score card"
         when "a" # All 18 holes
             begin
                 puts "Enter stroke count per hole: "
@@ -59,32 +67,36 @@ class GolfApp
                 p "Invalid entry. You can only enter integers" # Stops and rescues invalid inputs
                 retry
             end
+            system "clear"
+            puts "Added to score card"
         when "6" # Quit App
+            system "clear"
             puts "Back to Main Menu"
         else # Prompts the user what the quit button is, then calls this method again to re-do method
-            puts "Not a valid input, enter 6 to quit to main"
+            system "clear"
+            puts "Not a valid input, enter 6 to quit to main\n\n"
             add_score(ps)
         end
     end
 
     # View past scores method
     def past_scores(past_s)
-            if past_s[:one].nil? && past_s[:ten].nil? # Checks if hash is empty and delivers this outcome
-                puts "No Personal score yet."
-            elsif !past_s[:one].nil? && !past_s[:ten].nil? # Checks if hash is full and delivers stroke count
-                    puts "You had a stroke count of #{past_s.values.sum} for all eighteen Holes"
-                    puts "Here are the scores per hole: "
-                    past_s.each do |hole, stroke|
-                        p "#{hole.capitalize} | #{stroke}" unless stroke.nil?
-                    end
-            else
-                puts "Stroke count: #{past_s.compact.values.sum}"
-                puts "Stroke count per hole: "
-                # Goes through all available personal scores
-                past_s.each do |hole, stroke|
-                    p "#{hole.capitalize} | #{stroke}" unless stroke.nil?
-                end
+        if past_s[:one].nil? && past_s[:ten].nil? # Checks if hash is empty and delivers this outcome
+            puts "No Personal score yet."
+        elsif !past_s[:one].nil? && !past_s[:ten].nil? # Checks if hash is full and delivers stroke count
+            puts "You had a stroke count of #{past_s.values.sum} for all eighteen Holes"
+            puts "Here are the scores per hole: "
+            past_s.each do |hole, stroke|
+                p "#{hole.capitalize} | #{stroke}" unless stroke.nil?
             end
+        else
+            puts "Stroke count: #{past_s.compact.values.sum}"
+            puts "Stroke count per hole: "
+            # Goes through all available personal scores
+            past_s.each do |hole, stroke|
+                p "#{hole.capitalize} | #{stroke}" unless stroke.nil?
+            end
+        end
     end
 
     # Menu method, this is the main menu and how it navigates. # Parameters: par_count, personal_score and high_score
@@ -96,25 +108,39 @@ class GolfApp
             input = gets.chomp # Haven't fixed this to accept no other values yet.
             case input
             when "1" # Add round
+                system "clear"
                 add_score(ps) # Call to add_score Method
             when "2" # View Course Par
+                system "clear"
                 pc.each { |hole, par| p "#{hole.capitalize} | #{par} par" } # displays the courses par
             when "3" # View Past Scores
+                system "clear"
                 past_scores(ps)
             when "4" # Viewing the high scores
+                system "clear"
                 begin
                     raise(NoRecordsError) if ps[:one].nil? && ps[:ten].nil?
 
                     puts "Best score!"
+                    puts "Stroke count: #{ps.compact.values.sum}"
                     hs.each { |k, v| p "#{k.capitalize} | #{v}" unless v.nil? }
                 rescue NoRecordsError => e
                     e.message
                     next
                 end
-            when "5"
-                save_to_file(hs)
-                p "Save complete"
+            when "5" # Saving high_score to a file
+                system "clear"
+                begin
+                    raise(NoRecordsError) if ps[:one].nil? && ps[:ten].nil?
+
+                    save_to_file(hs)
+                    p "Save complete"
+                rescue NoRecordsError => e
+                    e.message
+                    next
+                end
             when "6" # Quit
+                system "clear"
                 puts "Goodbye"
                 break
             end
@@ -151,7 +177,6 @@ class GolfApp
         hs.each { |hole, hits| file << "\n#{hole.capitalize} | #{hits}" unless hits.nil? }
         file.close
     end
-
 end
 
 golf = GolfApp.new
