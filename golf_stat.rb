@@ -3,7 +3,7 @@ par_count = { one: 4, two: 4, three: 5, four: 3, five: 4, six: 4, seven: 4, eigh
               ten: 3, eleven: 4, twelve: 5, thirteen: 4, fourteen: 4, fifteen: 4, sixteen: 4, seventeen: 4, eighteen: 4 }
 # High Scores for personal scores to merge the best in.
 high_score = { one: nil, two: nil, three: nil, four: nil, five: nil, six: nil, seven: nil, eight: nil, nine: nil,
-               ten: nil, eleven: nil, twelve: nil, thirteen: nil, fourteen: nil, fifteen: nil, sixteen: nil, seventeen: nil, eighteen: nil }
+                ten: nil, eleven: nil, twelve: nil, thirteen: nil, fourteen: nil, fifteen: nil, sixteen: nil, seventeen: nil, eighteen: nil }
 # Default scores
 personal_score = high_score.clone
 
@@ -149,9 +149,13 @@ class GolfApp
 
     # Gives High_score value of personal score only take values that are higher.
     def make_highest(ps, hs)
-        ps.each do |k, v| # Go through all keys
-            hs[k] = v if hs[k].nil? || hs[k] != k # if hash value is nil OR hash value is not equal to personal score
-        end
+            ps.each do |k, v|       # Go through all keys and values
+                if hs[k].nil?       # If nil? replace it with personal_score v value
+                    hs[k] = v
+                elsif hs[k] > v     # Needed to make elsif for > because nil does not compare and throws argument error 
+                    hs[k] = v
+                end
+            end
     end
 
     # Save the current highscore to a file
